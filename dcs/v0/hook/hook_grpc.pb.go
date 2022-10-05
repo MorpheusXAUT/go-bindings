@@ -60,6 +60,8 @@ type HookServiceClient interface {
 	GetBannedPlayers(ctx context.Context, in *GetBannedPlayersRequest, opts ...grpc.CallOption) (*GetBannedPlayersResponse, error)
 	// https://wiki.hoggitworld.com/view/DCS_func_getUnitType
 	GetUnitType(ctx context.Context, in *GetUnitTypeRequest, opts ...grpc.CallOption) (*GetUnitTypeResponse, error)
+	// https://wiki.hoggitworld.com/view/DCS_func_getRealTime
+	GetRealTime(ctx context.Context, in *GetRealTimeRequest, opts ...grpc.CallOption) (*GetRealTimeResponse, error)
 }
 
 type hookServiceClient struct {
@@ -223,6 +225,15 @@ func (c *hookServiceClient) GetUnitType(ctx context.Context, in *GetUnitTypeRequ
 	return out, nil
 }
 
+func (c *hookServiceClient) GetRealTime(ctx context.Context, in *GetRealTimeRequest, opts ...grpc.CallOption) (*GetRealTimeResponse, error) {
+	out := new(GetRealTimeResponse)
+	err := c.cc.Invoke(ctx, "/dcs.hook.v0.HookService/GetRealTime", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // HookServiceServer is the server API for HookService service.
 // All implementations must embed UnimplementedHookServiceServer
 // for forward compatibility
@@ -265,6 +276,8 @@ type HookServiceServer interface {
 	GetBannedPlayers(context.Context, *GetBannedPlayersRequest) (*GetBannedPlayersResponse, error)
 	// https://wiki.hoggitworld.com/view/DCS_func_getUnitType
 	GetUnitType(context.Context, *GetUnitTypeRequest) (*GetUnitTypeResponse, error)
+	// https://wiki.hoggitworld.com/view/DCS_func_getRealTime
+	GetRealTime(context.Context, *GetRealTimeRequest) (*GetRealTimeResponse, error)
 	mustEmbedUnimplementedHookServiceServer()
 }
 
@@ -322,6 +335,9 @@ func (UnimplementedHookServiceServer) GetBannedPlayers(context.Context, *GetBann
 }
 func (UnimplementedHookServiceServer) GetUnitType(context.Context, *GetUnitTypeRequest) (*GetUnitTypeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUnitType not implemented")
+}
+func (UnimplementedHookServiceServer) GetRealTime(context.Context, *GetRealTimeRequest) (*GetRealTimeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRealTime not implemented")
 }
 func (UnimplementedHookServiceServer) mustEmbedUnimplementedHookServiceServer() {}
 
@@ -642,6 +658,24 @@ func _HookService_GetUnitType_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _HookService_GetRealTime_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRealTimeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(HookServiceServer).GetRealTime(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/dcs.hook.v0.HookService/GetRealTime",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(HookServiceServer).GetRealTime(ctx, req.(*GetRealTimeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // HookService_ServiceDesc is the grpc.ServiceDesc for HookService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -716,6 +750,10 @@ var HookService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUnitType",
 			Handler:    _HookService_GetUnitType_Handler,
+		},
+		{
+			MethodName: "GetRealTime",
+			Handler:    _HookService_GetRealTime_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
